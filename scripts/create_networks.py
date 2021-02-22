@@ -115,6 +115,15 @@ def get_most_popular_companies( unique ):
 
   return names
 
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
+
+def process_id_number( s ):
+
+  """Ensure all Officer ID numbers have the same length (19 characters).
+  """
+
+  return f'{s[ -3 : ]:*>19}'
+
 ###############################################################################
 
 # Read in all JSON files containing company data
@@ -161,6 +170,9 @@ for i, company in enumerate( company_list ):
 
 # Convert list of dicts to Pandas DataFrame
 df = pd.DataFrame( officer_dict_list )
+
+# Make number of characters in `IdNumber` field consistent for all officers
+df[ 'IdNumber' ] = df[ 'IdNumber' ].apply( process_id_number )
 
 # Create tuple that uniquely specifies a single officer (since two different
 # people may have the same name OR ID number, but they probably won't BOTH be
@@ -303,6 +315,13 @@ nx.write_gexf(
 # Get set of all officers and corporations included in the subgraphs
 filtered_officers = set( G_officers.nodes )
 filtered_corps = set( G_corps.nodes )
+
+# Print minimum and maximum degree for both networks
+G_corps_degrees = dict( G_corps.degree ).values( )
+G_officers_degrees = dict( G_officers.degree ).values( )
+
+print( 'Minimum and maximum degree in corporation-aggregated network: ', min( G_corps_degrees ), max( G_corps_degrees ) )
+print( 'Minimum and maximum degree in officer-aggregated network: ', min( G_officers_degrees ), max( G_officers_degrees ) )
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
 # Save picked Pandas DataFrames of edges to file
